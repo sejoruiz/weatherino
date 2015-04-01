@@ -18,6 +18,7 @@
 
 // Temperature constants 
 #define TEMP_PIN A1
+#define VOLTAGE_SUM .378
 
 // Light constants
 #define LIGHT_PIN A2
@@ -204,11 +205,14 @@ float getLight(int numMeasurements)
 float getTemperature(int numMeasurements)
 {
   float temp=0;
-  for (int i = 0; i < (numMeasurements-1); i++)
+  for (int i=0; i < numMeasurements; i++)
     {
       temp+=( float )analogRead(TEMP_PIN)/numMeasurements;
-      delay(5);
+      delay(15);
     }
+  //Calculate the temperature
+  temp=1.1*temp/1024; //Output voltage from the sensor
+  temp=temp*100; // 10mV/ºC
   return temp;
 }
 		     
@@ -229,7 +233,7 @@ void getMeasures(float *measures)
 void measurementsToUART()
 {
   float temp, light, humid;
-  temp = getTemperature(4);
+  temp = getTemperature(1);
   light = getLight(4);
   humid = getHumidity();
   Serial.print("Temperature: ");
@@ -433,6 +437,7 @@ void setup()
   pinMode(LED_PIN, OUTPUT); //Power On LED
   pinMode(HUMIDITY_VCC, OUTPUT); //VCC for the Humidity
   pinMode(RELAY_PIN, OUTPUT); //Relay
+  pinMode(TEMP_PIN, INPUT);
   digitalWrite(HUMIDITY_VCC, LOW); //Just in case we put it to low
 
   //Setup analog reference
